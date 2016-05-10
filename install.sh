@@ -12,7 +12,7 @@ if [ "$(id -u)" = "0" ]
   exit
 fi
 
-PROJECT_HOME=${HOME}/hsmm-pi
+PROJECT_HOME=${HOME}/hsmm-pi-direct
 
 cd ${HOME}
 
@@ -57,7 +57,7 @@ sudo pear install cakephp/CakePHP-2.8.3
 
 # Checkout the HSMM-Pi project
 if [ ! -e ${PROJECT_HOME} ]; then
-    git clone https://github.com/urlgrey/hsmm-pi.git
+    git clone https://github.com/cbegg50/hsmm-pi-direct.git
 else
     cd ${PROJECT_HOME}
     git pull
