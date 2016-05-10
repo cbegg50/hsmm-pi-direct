@@ -32,6 +32,214 @@ MainIp {wifi_ip_address}
 # can be specified in the same block
 # and multiple blocks can be set.
 
+# Fisheye mechanism for TC messages 0=off, 1=on
+
+LinkQualityFishEye 1
+LinkQualityAlgorithm "etx_ffeth"
+
+
+# IP version to use (4 or 6)
+
+IpVersion    4
+
+# Clear the screen each time the internal state changes
+
+ClearScreen     yes
+
+# Should olsrd keep on running even if there are
+# no interfaces available? This is a good idea
+# for a PCMCIA/USB hotswap environment.
+# "yes" OR "no"
+
+AllowNoInt yes
+
+# TOS(type of service) value for
+# the IP header of control traffic.
+# If not set it will default to 16
+
+TosValue 16
+
+# The fixed willingness to use(0-7)
+# If not set willingness will be calculated
+# dynamically based on battery/power status
+# if such information is available
+
+Willingness    	      3
+
+# HNA IPv4 routes
+# syntax: netaddr netmask
+# Example Internet gateway:
+# 0.0.0.0 0.0.0.0
+
+Hna4
+{
+#   Internet gateway:
+#   0.0.0.0      0.0.0.0
+#   more entries can be added:
+#   192.168.1.0  255.255.255.0
+}
+
+# HNA IPv6 routes
+# syntax: netaddr prefix
+# Example Internet gateway:
+Hna6
+{
+#   Internet gateway:
+#   ::              0
+#   more entries can be added:
+#   fec0:2200:106:: 48
+}
+
+
+# Wether to use hysteresis or not
+# Hysteresis adds more robustness to the
+# link sensing but delays neighbor registration.
+# Used by default. 'yes' or 'no'
+# Do not use hysteresis with ETX!
+
+UseHysteresis		no
+
+# Hysteresis parameters
+# Do not alter these unless you know
+# what you are doing!
+# Set to auto by default. Allowed
+# values are floating point values
+# in the interval 0,1
+# THR_LOW must always be lower than
+# THR_HIGH.
+
+#HystScaling	0.50
+#HystThrHigh	0.80
+#HystThrLow	0.30
+
+
+# Link quality level
+# 0 = do not use link quality
+# 1 = use link quality for MPR selection
+# 2 = use link quality for MPR selection and routing
+# Defaults to 0
+
+LinkQualityLevel	2
+
+# Polling rate in seconds(float).
+# Default value 0.05 sec
+
+Pollrate  0.05
+
+
+# TC redundancy
+# Specifies how much neighbor info should
+# be sent in TC messages
+# Possible values are:
+# 0 - only send MPR selectors
+# 1 - send MPR selectors and MPRs
+# 2 - send all neighbors
+#
+# defaults to 0
+
+TcRedundancy  2
+
+
+#
+# MPR coverage
+# Specifies how many MPRs a node should
+# try select to reach every 2 hop neighbor
+#
+# Can be set to any integer >0
+#
+# defaults to 1
+
+MprCoverage   5
+
+
+# Allow processes like the GUI front-end
+# to connect to the daemon.
+
+IpcConnect
+{
+     # Determines how many simultaneously
+     # IPC connections that will be allowed
+     # Setting this to 0 disables IPC
+
+     MaxConnections  0
+
+     # By default only 127.0.0.1 is allowed
+     # to connect. Here allowed hosts can
+     # be added
+
+     Host            127.0.0.1
+     #Host            10.0.0.5
+
+     # You can also specify entire net-ranges
+     # that are allowed to connect. Multiple
+     # entries are allowed
+
+     #Net             192.168.1.0 255.255.255.0
+}
+
+# Olsrd plugins to load
+# This must be the absolute path to the file
+# or the loader will use the following scheme:
+# - Try the paths in the LD_LIBRARY_PATH
+#   environment variable.
+# - The list of libraries cached in /etc/ld.so.cache
+# - /lib, followed by /usr/lib
+
+# Configuration examples for plugins:
+# see /usr/share/doc/olsrd-plugins/ for some for documentation
+
+LoadPlugin "olsrd_jsoninfo.so.0.0"
+{
+    # the default port is 9090 but you can change it like this:
+    #PlParam     "port"   "8080"
+
+    # You can set a "accept" single address to allow to connect to
+    # jsoninfo. If no address is specified, then localhost (127.0.0.1)
+    # is allowed by default.  jsoninfo will only use the first "accept"
+    # parameter specified and will ignore the rest.
+
+    # to allow a specific host:
+    #PlParam      "accept" "172.29.44.23"
+    # if you set it to 0.0.0.0, it will accept all connections
+    PlParam      "accept" "127.0.0.1"
+
+    # specify a UUID for this node to track it for debugging
+    #PlParam      "UUIDFile" "/etc/olsrd/olsrd.uuid"
+}
+
+LoadPlugin "olsrd_arprefresh.so.0.1"
+{
+}
+
+LoadPlugin "olsrd_httpinfo.so.0.1"
+{
+#	# defaults to 1978
+#	PlParam "Port" "8080"
+#	# if you dont set these, the default is to listen only on the loopback device
+#	#PlParam "Host"   "80.23.53.22"
+#	#PlParam "Net"    "10.0.0.0 255.0.0.0"
+	PlParam "Net" "0.0.0.0 0.0.0.0"
+        PlParam "Resolve" "true"
+}
+
+LoadPlugin "olsrd_nameservice.so.0.3"
+{
+    PlParam "sighup-pid-file" "/var/run/dnsmasq/dnsmasq.pid"
+    PlParam "interval" "30"
+    PlParam "timeout" "300"
+    PlParam "resolv-file" "/etc/resolv.conf"
+    PlParam "name" "{node_name}"
+    PlParam "latlon-file" "/var/run/latlon.js"
+{olsrd_dhcp_reservations}
+{olsrd_network_services}
+{latlon_infile}
+}
+
+{olsrd_dynamic_gateway_block}
+
+{olsrd_secure_block}
+
+
 # !!CHANGE THE INTERFACE LABEL(s) TO MATCH YOUR INTERFACE(s)!!
 # (eg. wlan0 or eth1):
 #
@@ -134,211 +342,8 @@ Interface "{wifi_adapter_name}"
 
 }
 
-# Fisheye mechanism for TC messages 0=off, 1=on
-
-LinkQualityFishEye 1
-LinkQualityAlgorithm "etx_ffeth"
-
-
-# IP version to use (4 or 6)
-
-IpVersion    4
-
-# Clear the screen each time the internal state changes
-
-ClearScreen     yes
-
-# HNA IPv4 routes
-# syntax: netaddr netmask
-# Example Internet gateway:
-# 0.0.0.0 0.0.0.0
-
 Hna4
 {
-#   Internet gateway:
-#   0.0.0.0      0.0.0.0
-#   more entries can be added:
-#   192.168.1.0  255.255.255.0
+{lan_ip_network} {lan_ip_netmask}
 }
 
-# HNA IPv6 routes
-# syntax: netaddr prefix
-# Example Internet gateway:
-Hna6
-{
-#   Internet gateway:
-#   ::              0
-#   more entries can be added:
-#   fec0:2200:106:: 48
-}
-
-
-# Should olsrd keep on running even if there are
-# no interfaces available? This is a good idea
-# for a PCMCIA/USB hotswap environment.
-# "yes" OR "no"
-
-AllowNoInt yes
-
-# TOS(type of service) value for
-# the IP header of control traffic.
-# If not set it will default to 16
-
-TosValue 16
-
-# The fixed willingness to use(0-7)
-# If not set willingness will be calculated
-# dynamically based on battery/power status
-# if such information is available
-
-Willingness    	      3
-
-# Allow processes like the GUI front-end
-# to connect to the daemon.
-
-IpcConnect
-{
-     # Determines how many simultaneously
-     # IPC connections that will be allowed
-     # Setting this to 0 disables IPC
-
-     MaxConnections  0
-
-     # By default only 127.0.0.1 is allowed
-     # to connect. Here allowed hosts can
-     # be added
-
-     Host            127.0.0.1
-     #Host            10.0.0.5
-
-     # You can also specify entire net-ranges
-     # that are allowed to connect. Multiple
-     # entries are allowed
-
-     #Net             192.168.1.0 255.255.255.0
-}
-
-# Wether to use hysteresis or not
-# Hysteresis adds more robustness to the
-# link sensing but delays neighbor registration.
-# Used by default. 'yes' or 'no'
-# Do not use hysteresis with ETX!
-
-UseHysteresis		no
-
-# Hysteresis parameters
-# Do not alter these unless you know
-# what you are doing!
-# Set to auto by default. Allowed
-# values are floating point values
-# in the interval 0,1
-# THR_LOW must always be lower than
-# THR_HIGH.
-
-#HystScaling	0.50
-#HystThrHigh	0.80
-#HystThrLow	0.30
-
-
-# Link quality level
-# 0 = do not use link quality
-# 1 = use link quality for MPR selection
-# 2 = use link quality for MPR selection and routing
-# Defaults to 0
-
-LinkQualityLevel	2
-
-# Polling rate in seconds(float).
-# Default value 0.05 sec
-
-Pollrate  0.05
-
-
-# TC redundancy
-# Specifies how much neighbor info should
-# be sent in TC messages
-# Possible values are:
-# 0 - only send MPR selectors
-# 1 - send MPR selectors and MPRs
-# 2 - send all neighbors
-#
-# defaults to 0
-
-TcRedundancy  2
-
-
-#
-# MPR coverage
-# Specifies how many MPRs a node should
-# try select to reach every 2 hop neighbor
-#
-# Can be set to any integer >0
-#
-# defaults to 1
-
-MprCoverage   5
-
-
-# Olsrd plugins to load
-# This must be the absolute path to the file
-# or the loader will use the following scheme:
-# - Try the paths in the LD_LIBRARY_PATH
-#   environment variable.
-# - The list of libraries cached in /etc/ld.so.cache
-# - /lib, followed by /usr/lib
-
-# Configuration examples for plugins:
-# see /usr/share/doc/olsrd-plugins/ for some for documentation
-
-LoadPlugin "olsrd_jsoninfo.so.0.0"
-{
-    # the default port is 9090 but you can change it like this:
-    #PlParam     "port"   "8080"
-
-    # You can set a "accept" single address to allow to connect to
-    # jsoninfo. If no address is specified, then localhost (127.0.0.1)
-    # is allowed by default.  jsoninfo will only use the first "accept"
-    # parameter specified and will ignore the rest.
-
-    # to allow a specific host:
-    #PlParam      "accept" "172.29.44.23"
-    # if you set it to 0.0.0.0, it will accept all connections
-    PlParam      "accept" "127.0.0.1"
-
-    # specify a UUID for this node to track it for debugging
-    #PlParam      "UUIDFile" "/etc/olsrd/olsrd.uuid"
-}
-
-LoadPlugin "olsrd_arprefresh.so.0.1"
-{
-}
-
-LoadPlugin "olsrd_httpinfo.so.0.1"
-{
-#	# defaults to 1978
-#	PlParam "Port" "8080"
-#	# if you dont set these, the default is to listen only on the loopback device
-#	#PlParam "Host"   "80.23.53.22"
-#	#PlParam "Net"    "10.0.0.0 255.0.0.0"
-	PlParam "Net" "0.0.0.0 0.0.0.0"
-        PlParam "Resolve" "true"
-}
-
-LoadPlugin "olsrd_nameservice.so.0.3"
-{
-    PlParam "sighup-pid-file" "/var/run/dnsmasq/dnsmasq.pid"
-    PlParam "interval" "30"
-    PlParam "timeout" "300"
-    PlParam "resolv-file" "/etc/resolv.conf"
-    PlParam "name" "{node_name}"
-    PlParam "latlon-file" "/var/run/latlon.js"
-
-{olsrd_network_services}
-
-{latlon_infile}
-
-}
-
-{olsrd_dynamic_gateway_block}
-
-{olsrd_secure_block}
