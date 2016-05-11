@@ -94,7 +94,7 @@ iptables -A FORWARD -i " . $network_setting['NetworkSetting']['wifi_adapter_name
 			}
 		} else {
 			if (0 == strcmp($network_setting['NetworkSetting']['lan_mode'], 'NAT')) {
-				$iptables_gateway_commands =
+				$iptables_gateway_commands = 
 				"
 # Flush the tables
 iptables -F INPUT
@@ -111,7 +111,6 @@ iptables -A FORWARD -i " . $network_setting['NetworkSetting']['wifi_adapter_name
 
 # Packet masquerading
 iptables -t nat -A POSTROUTING -o " . $network_setting['NetworkSetting']['wifi_adapter_name'] . " -j SNAT --to-source " . $network_setting['NetworkSetting']['wifi_ip_address'];
-
                         	if ($network_services != NULL && sizeof($network_services) > 0) {
                                 	foreach ($network_services as $service) {
                                         	$iptables_service_routing .=
@@ -122,7 +121,7 @@ iptables -t nat -A POSTROUTING -p " . $service['NetworkService']['protocol'] . "
 				}
 			}
 			else { // Direct mode
-				$iptables_gateway_commands =
+				$iptables_gateway_commands = 
 				"
 # Flush the tables
 iptables -F INPUT
@@ -135,11 +134,10 @@ iptables -A FORWARD -i " . $network_setting['NetworkSetting']['wifi_adapter_name
 
 # Packet masquerading
 iptables -t nat -A POSTROUTING -o " . $network_setting['NetworkSetting']['wifi_adapter_name'] . " -j SNAT --to-source " . $network_setting['NetworkSetting']['wifi_ip_address'];
-
                         	if ($network_services != NULL && sizeof($network_services) > 0) {
                                 	foreach ($network_services as $service) {
                                         	$iptables_service_routing .=
-                                        	"
+                                        	"";
                                 	}
 				}
 			}
